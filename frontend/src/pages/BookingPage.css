@@ -1,0 +1,140 @@
+.booking-page {
+    min-height: 100vh;
+    background: var(--color-bg-secondary);
+    padding: var(--spacing-8) 0;
+}
+
+.booking-header {
+    text-align: center;
+    margin-bottom: var(--spacing-8);
+}
+
+.booking-header h1 {
+    margin-bottom: var(--spacing-2);
+}
+
+.booking-header p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+}
+
+.booking-content {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: var(--spacing-6);
+}
+
+.booking-form-container {
+    background: var(--color-white);
+    padding: var(--spacing-6);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.form-section {
+    margin-bottom: var(--spacing-6);
+}
+
+.form-section h3 {
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.booking-summary {
+    position: sticky;
+    top: var(--spacing-4);
+    height: fit-content;
+}
+
+.booking-summary .card {
+    padding: var(--spacing-5);
+    margin-bottom: var(--spacing-4);
+}
+
+.booking-summary h3 {
+    margin-bottom: var(--spacing-4);
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-3) 0;
+    font-size: var(--font-size-sm);
+}
+
+.summary-item span {
+    color: var(--color-text-secondary);
+}
+
+.summary-item strong {
+    color: var(--color-text);
+}
+
+.summary-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: var(--spacing-3) 0;
+}
+
+.summary-total {
+    font-size: var(--font-size-lg);
+    padding-top: var(--spacing-4);
+}
+
+.summary-total strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-2xl);
+}
+
+.summary-note {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-3);
+    background: var(--color-gray-100);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+.summary-note p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.booking-policies {
+    padding: var(--spacing-4);
+}
+
+.booking-policies h4 {
+    margin-bottom: var(--spacing-3);
+}
+
+.booking-policies ul {
+    list-style: none;
+    padding: 0;
+}
+
+.booking-policies li {
+    padding: var(--spacing-2) 0;
+    padding-left: var(--spacing-4);
+    position: relative;
+    font-size: var(--font-size-sm);
+}
+
+.booking-policies li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+@media (max-width: 1024px) {
+    .booking-content {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-summary {
+        position: static;
+    }
+}

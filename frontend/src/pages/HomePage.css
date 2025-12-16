@@ -1,0 +1,68 @@
+.home-page {
+    min-height: 100vh;
+}
+
+.hero {
+    position: relative;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white);
+    padding: var(--spacing-16) 0;
+    text-align: center;
+}
+
+.theme-toggle-container {
+    position: absolute;
+    top: var(--spacing-4);
+    right: var(--spacing-4);
+    z-index: 10;
+}
+
+.hero-title {
+    font-size: var(--font-size-5xl);
+    margin-bottom: var(--spacing-4);
+    font-weight: 800;
+}
+
+.hero-subtitle {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-8);
+    opacity: 0.9;
+}
+
+.hero-actions {
+    display: flex;
+    gap: var(--spacing-4);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.features {
+    padding: var(--spacing-16) 0;
+    background: var(--color-bg-secondary);
+}
+
+.feature-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-4);
+}
+
+.parks-preview {
+    padding: var(--spacing-16) 0;
+}
+
+.footer {
+    background: var(--color-gray-900);
+    color: var(--color-white);
+    padding: var(--spacing-8) 0;
+    margin-top: auto;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: var(--font-size-3xl);
+    }
+
+    .hero-subtitle {
+        font-size: var(--font-size-lg);
+    }
+}

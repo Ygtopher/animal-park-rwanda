@@ -1,0 +1,257 @@
+.park-detail-page {
+    min-height: 100vh;
+}
+
+.park-hero {
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.park-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+    display: flex;
+    align-items: flex-end;
+    padding: var(--spacing-8) 0;
+    color: var(--color-white);
+}
+
+.park-hero h1 {
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--spacing-2);
+}
+
+.park-location {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-2);
+}
+
+.park-rating {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.park-content {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: var(--spacing-8);
+    padding: var(--spacing-8) 0;
+}
+
+.park-section {
+    margin-bottom: var(--spacing-8);
+}
+
+.park-section h2 {
+    margin-bottom: var(--spacing-4);
+    color: var(--color-text);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-4);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+}
+
+.info-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.info-value {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.amenities-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.amenity-badge {
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.animals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.animal-card {
+    overflow: hidden;
+}
+
+.animal-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.animal-info {
+    padding: var(--spacing-4);
+}
+
+.animal-info h3 {
+    margin-bottom: var(--spacing-1);
+}
+
+.animal-species {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-2);
+}
+
+.animal-description {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-3);
+}
+
+.animal-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+}
+
+.endangered-badge {
+    background: var(--color-error);
+    color: var(--color-white);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+}
+
+.park-sidebar {
+    position: sticky;
+    top: var(--spacing-4);
+    height: fit-content;
+}
+
+.booking-card {
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
+}
+
+.booking-card h3 {
+    margin-bottom: var(--spacing-3);
+}
+
+.price {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-4);
+}
+
+.price strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-2xl);
+}
+
+.availability-info {
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-3);
+    text-align: center;
+}
+
+.availability-info.available {
+    background: var(--color-success-light);
+    border: 1px solid var(--color-success);
+}
+
+.availability-info.unavailable {
+    background: var(--color-error-light);
+    border: 1px solid var(--color-error);
+}
+
+.availability-status {
+    font-weight: 600;
+    margin-bottom: var(--spacing-1);
+}
+
+.availability-slots {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.park-tips {
+    padding: var(--spacing-5);
+}
+
+.park-tips h4 {
+    margin-bottom: var(--spacing-3);
+}
+
+.park-tips ul {
+    list-style: none;
+    padding: 0;
+}
+
+.park-tips li {
+    padding: var(--spacing-2) 0;
+    padding-left: var(--spacing-4);
+    position: relative;
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+.park-tips li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.loading-container {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 1024px) {
+    .park-content {
+        grid-template-columns: 1fr;
+    }
+
+    .park-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .park-hero {
+        height: 300px;
+    }
+
+    .park-hero h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .animals-grid {
+        grid-template-columns: 1fr;
+    }
+}

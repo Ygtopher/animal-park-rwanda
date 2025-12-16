@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  TOURIST
+  RANGER
+  ADMIN
+}
+
+enum Province {
+  KIGALI
+  NORTHERN
+  SOUTHERN
+  EASTERN
+  WESTERN
+}
+
+enum ParkStatus {
+  ACTIVE
+  MAINTENANCE
+  CLOSED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum PaymentMethod {
+  MOBILE_MONEY_MTN
+  MOBILE_MONEY_AIRTEL
+  CARD
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  REPORTED
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+}
+
+enum VisitorType {
+  RWANDAN_ADULT
+  RWANDAN_CHILD
+  EAC_ADULT
+  EAC_CHILD
+  FOREIGN_ADULT
+  FOREIGN_CHILD
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  firstName     String
+  lastName      String
+  phone         String
+  role          UserRole       @default(TOURIST)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  reservations  Reservation[]
+  reviews       Review[]
+  incidents     Incident[]
+  parkRanger    ParkRanger?
+  scannedTickets Ticket[]      @relation("ScannedBy")
+}
+
+model Park {
+  id            String         @id @default(uuid())
+  name          String
+  description   String
+  location      String
+  province      Province
+  district      String
+  capacity      Int
+  openingTime   String
+  closingTime   String
+  basePrice     Decimal        @db.Decimal(10, 2)
+  imageUrls     String[]
+  amenities     String[]
+  status        ParkStatus     @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  animals       Animal[]
+  reservations  Reservation[]
+  reviews       Review[]
+  schedules     ParkSchedule[]
+  incidents     Incident[]
+  rangers       ParkRanger[]
+  pricingRules  PricingRule[]
+}
+
+model Animal {
+  id            String         @id @default(uuid())
+  parkId        String
+  name          String
+  species       String
+  description   String
+  count         Int
+  imageUrl      String
+  endangered    Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  park          Park           @relation(fields: [parkId], references: [id], onDelete: Cascade)
+  
+  @@index([parkId])
+}
+
+model Reservation {
+  id                String              @id @default(uuid())
+  userId            String
+  parkId            String
+  visitDate         DateTime
+  numberOfVisitors  Int
+  totalAmount       Decimal             @db.Decimal(10, 2)
+  status            ReservationStatus   @default(PENDING)
+  bookingReference  String              @unique
+  specialRequests   String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  user              User                @relation(fields: [userId], references: [id])
+  park              Park                @relation(fields: [parkId], references: [id])
+  payment           Payment?
+  ticket            Ticket?
+  
+  @@index([userId])
+  @@index([parkId])
+  @@index([visitDate])
+  @@index([bookingReference])
+}
+
+model Payment {
+  id              String         @id @default(uuid())
+  reservationId   String         @unique
+  amount          Decimal        @db.Decimal(10, 2)
+  currency        String         @default("RWF")
+  method          PaymentMethod
+  status          PaymentStatus  @default(PENDING)
+  transactionId   String         @unique
+  paidAt          DateTime?
+  createdAt       DateTime       @default(now())
+  
+  reservation     Reservation    @relation(fields: [reservationId], references: [id])
+  
+  @@index([transactionId])
+}
+
+model Ticket {
+  id              String         @id @default(uuid())
+  reservationId   String         @unique
+  qrCode          String         @unique
+  validFrom       DateTime
+  validUntil      DateTime
+  scanned         Boolean        @default(false)
+  scannedAt       DateTime?
+  scannedBy       String?
+  createdAt       DateTime       @default(now())
+  
+  reservation     Reservation    @relation(fields: [reservationId], references: [id])
+  scanner         User?          @relation("ScannedBy", fields: [scannedBy], references: [id])
+  
+  @@index([qrCode])
+}
+
+model Review {
+  id              String         @id @default(uuid())
+  userId          String
+  parkId          String
+  rating          Int
+  comment         String
+  images          String[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  user            User           @relation(fields: [userId], references: [id])
+  park            Park           @relation(fields: [parkId], references: [id])
+  
+  @@index([parkId])
+  @@index([userId])
+}
+
+model ParkSchedule {
+  id              String         @id @default(uuid())
+  parkId          String
+  date            DateTime       @db.Date
+  availableSlots  Int
+  bookedSlots     Int            @default(0)
+  specialNotes    String?
+  isHoliday       Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  
+  park            Park           @relation(fields: [parkId], references: [id])
+  
+  @@unique([parkId, date])
+  @@index([parkId])
+  @@index([date])
+}
+
+model Incident {
+  id              String            @id @default(uuid())
+  parkId          String
+  reportedBy      String
+  title           String
+  description     String
+  severity        IncidentSeverity
+  status          IncidentStatus    @default(REPORTED)
+  reportedAt      DateTime          @default(now())
+  resolvedAt      DateTime?
+  
+  park            Park              @relation(fields: [parkId], references: [id])
+  reporter        User              @relation(fields: [reportedBy], references: [id])
+  
+  @@index([parkId])
+  @@index([status])
+}
+
+model ParkRanger {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  parkId          String
+  assignedDate    DateTime       @default(now())
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  
+  user            User           @relation(fields: [userId], references: [id])
+  park            Park           @relation(fields: [parkId], references: [id])
+  
+  @@index([parkId])
+}
+
+model PricingRule {
+  id              String         @id @default(uuid())
+  parkId          String
+  visitorType     VisitorType
+  price           Decimal        @db.Decimal(10, 2)
+  effectiveFrom   DateTime       @db.Date
+  effectiveTo     DateTime?      @db.Date
+  createdAt       DateTime       @default(now())
+  
+  park            Park           @relation(fields: [parkId], references: [id])
+  
+  @@index([parkId])
+}

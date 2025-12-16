@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#8B4513"/>
+  <circle cx="200" cy="150" r="80" fill="#D2691E"/>
+  <text x="200" y="160" font-family="Arial" font-size="24" fill="white" text-anchor="middle">
+    Wildlife
+  </text>
+</svg>
