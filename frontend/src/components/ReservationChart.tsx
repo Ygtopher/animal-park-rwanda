@@ -29,7 +29,7 @@ interface ReservationChartProps {
     type: 'daily' | 'monthly';
 }
 
-const ReservationChart: React.FC<ReservationChartProps> = ({ data, title, type }) => {
+const ReservationChart: React.FC<ReservationChartProps> = ({ data, title: _, type }) => {
     const labels = data.map(item =>
         type === 'daily'
             ? new Date(item.date!).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })

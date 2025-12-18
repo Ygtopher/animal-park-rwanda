@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { reservationApi, Reservation } from '../api/reservation.api';
-import apiClient from '../api/axios.config';
 import { RootState } from '../store/store';
 import toast from 'react-hot-toast';
 import './MyBookingsPage.css';

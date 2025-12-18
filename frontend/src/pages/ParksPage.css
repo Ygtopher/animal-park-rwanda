@@ -1,124 +1,190 @@
-.parks-page {
+/* Immersive Hero Cards Design */
+.parks-page-immersive {
     min-height: 100vh;
+    background: var(--color-bg);
+    padding-bottom: var(--spacing-12);
 }
 
-.parks-hero {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: var(--color-white);
-    padding: var(--spacing-12) 0;
+.parks-hero-minimal {
     text-align: center;
-    margin-bottom: var(--spacing-8);
+    padding: var(--spacing-16) var(--spacing-4) var(--spacing-12);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: white;
 }
 
-.parks-hero h1 {
-    font-size: var(--font-size-4xl);
-    margin-bottom: var(--spacing-2);
+.parks-hero-minimal h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    margin-bottom: var(--spacing-3);
+    color: white;
 }
 
-.parks-hero p {
+.parks-hero-minimal p {
     font-size: var(--font-size-xl);
-    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.95);
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .parks-filters {
+    max-width: 1200px;
+    margin: 0 auto var(--spacing-8);
+    padding: 0 var(--spacing-6);
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: var(--spacing-4);
-    margin-bottom: var(--spacing-8);
 }
 
-.parks-grid {
+.parks-filters .form-input {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.parks-filters .form-input::placeholder {
+    color: var(--color-text-secondary);
+}
+
+.parks-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-6);
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: var(--spacing-6);
-    margin-bottom: var(--spacing-8);
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+    gap: var(--spacing-8);
 }
 
-.park-card {
-    overflow: hidden;
-    transition: all var(--transition-base);
-}
-
-.park-image {
+.park-hero-card {
     position: relative;
-    height: 220px;
+    height: 600px;
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.park-hero-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+}
+
+.park-hero-image {
+    position: absolute;
+    inset: 0;
     overflow: hidden;
 }
 
-.park-image img {
+.park-hero-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform var(--transition-slow);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.park-card:hover .park-image img {
-    transform: scale(1.05);
+.park-hero-card:hover .park-hero-image img {
+    transform: scale(1.1);
 }
 
-.park-badge {
+.park-overlay-gradient {
     position: absolute;
-    top: var(--spacing-3);
-    right: var(--spacing-3);
-    background: var(--color-secondary);
-    color: var(--color-black);
-    padding: var(--spacing-2) var(--spacing-3);
+    inset: 0;
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0.1) 0%,
+            rgba(0, 0, 0, 0.4) 50%,
+            rgba(0, 0, 0, 0.8) 100%);
+}
+
+.park-glass-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-8);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 24px 24px 0 0;
+    transform: translateY(0);
+    transition: all 0.4s ease;
+}
+
+.park-hero-card:hover .park-glass-content {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.park-badge-glass {
+    display: inline-block;
+    padding: var(--spacing-2) var(--spacing-4);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: var(--radius-full);
     font-size: var(--font-size-sm);
-    font-weight: 600;
-}
-
-.park-content {
-    padding: var(--spacing-5);
-}
-
-.park-content h3 {
-    margin-bottom: var(--spacing-2);
-    color: var(--color-text);
-}
-
-.park-location {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     margin-bottom: var(--spacing-3);
 }
 
-.park-description {
-    color: var(--color-text-secondary);
+.park-glass-content h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: white;
+    margin-bottom: var(--spacing-2);
+    line-height: 1.2;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.park-location-icon {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    margin-bottom: var(--spacing-4);
+}
+
+.park-brief {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: var(--font-size-base);
     line-height: 1.6;
-    margin-bottom: var(--spacing-4);
+    margin-bottom: var(--spacing-5);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.park-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-3);
-    margin-bottom: var(--spacing-4);
-    padding: var(--spacing-3);
-    background: var(--color-gray-100);
-    border-radius: var(--radius-md);
+.btn-glass {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-4) var(--spacing-6);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-full);
+    color: white;
+    font-weight: 700;
+    font-size: var(--font-size-base);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-.stat {
-    text-align: center;
-}
-
-.stat-label {
-    display: block;
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-1);
-}
-
-.stat-value {
-    display: block;
-    font-weight: 600;
-    color: var(--color-text);
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
 .loading {
     text-align: center;
     padding: var(--spacing-16) 0;
+    color: var(--color-text);
 }
 
 .spinner {
@@ -141,18 +207,52 @@
     text-align: center;
     padding: var(--spacing-16) 0;
     color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .parks-container {
+        grid-template-columns: 1fr;
+        max-width: 800px;
+    }
 }
 
 @media (max-width: 768px) {
+    .parks-hero-minimal {
+        padding: var(--spacing-12) var(--spacing-4) var(--spacing-8);
+    }
+
     .parks-filters {
         grid-template-columns: 1fr;
+        padding: 0 var(--spacing-4);
     }
 
-    .parks-grid {
-        grid-template-columns: 1fr;
+    .parks-container {
+        padding: 0 var(--spacing-4);
+        gap: var(--spacing-6);
     }
 
-    .parks-hero h1 {
-        font-size: var(--font-size-3xl);
+    .park-hero-card {
+        height: 500px;
+    }
+
+    .park-glass-content {
+        padding: var(--spacing-6);
+    }
+
+    .park-glass-content h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .park-hero-card {
+        height: 450px;
+        border-radius: 16px;
+    }
+
+    .park-glass-content {
+        padding: var(--spacing-5);
     }
 }

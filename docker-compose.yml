@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -8,14 +6,17 @@ services:
       POSTGRES_DB: animal_park
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - animal_park_network
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: animal_park_backend
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/animal_park
@@ -29,18 +30,29 @@ services:
     depends_on:
       - postgres
     restart: unless-stopped
-    command: sh -c "sleep 10 && npm start"
+    command: sh -c "sleep 15 && npx prisma migrate deploy && npm start"
+    networks:
+      - animal_park_network
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: animal_park_frontend
     environment:
       VITE_API_URL: http://localhost:5000
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - animal_park_network
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  animal_park_network:
+    driver: bridge

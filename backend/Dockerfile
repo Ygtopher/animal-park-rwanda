@@ -1,7 +1,7 @@
 FROM node:18-alpine
 
 # Install OpenSSL for Prisma
-RUN apk add --no-cache openssl openssl-dev
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 
@@ -24,6 +24,5 @@ RUN npm run build
 # Expose port
 EXPOSE 5000
 
-# Start command
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
-
+# Start command (migrations run in docker-compose command)
+CMD ["npm", "start"]

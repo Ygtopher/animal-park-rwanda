@@ -1,430 +1,367 @@
-# Animal Park System - Deployment Guide
+# Docker Deployment Guide - Animal Park Rwanda
 
-## 🚀 Quick Deployment Options
+## 🐳 Quick Start with Docker
 
-### Option 1: Local Development (Fastest)
+### Prerequisites
+- Docker Desktop installed
+- Docker Compose installed (included with Docker Desktop)
 
-**Time**: 5 minutes
+### One-Command Deployment
 
 ```bash
-# Navigate to project
-cd C:\Users\CHRISTOPHE\OneDrive\Desktop\animalpark
-
-# Start with Docker
 docker-compose up --build
-
-# In new terminal, seed database
-docker-compose exec backend npx prisma db seed
 ```
 
-**Access**:
+This will:
+1. Build all containers (PostgreSQL, Backend, Frontend)
+2. Set up networking between services
+3. Run database migrations
+4. Start all services
+
+**Access the application:**
 - Frontend: http://localhost:3000
-- Backend: http://localhost:5000
+- Backend API: http://localhost:5000
+- Database: localhost:5432
 
 ---
 
-### Option 2: Deploy to Heroku (Recommended for Demo)
+## 📋 Docker Configuration Overview
 
-**Time**: 30-45 minutes
+### Services
 
-#### Prerequisites
-- Heroku account (free tier works)
-- Heroku CLI installed
+#### 1. PostgreSQL Database
+- **Image:** postgres:15-alpine
+- **Port:** 5432
+- **Volume:** Persistent data storage
+- **Health Check:** Ensures database is ready before backend starts
 
-#### Backend Deployment
+#### 2. Backend API
+- **Build:** Multi-stage build for optimization
+- **Port:** 5000
+- **Features:**
+  - Automatic Prisma migrations
+  - Health check endpoint
+  - Non-root user for security
+  - Production-optimized build
 
+#### 3. Frontend
+- **Build:** Multi-stage build with Nginx
+- **Port:** 3000 (mapped to 80 internally)
+- **Features:**
+  - Static file serving
+  - React Router support
+  - Gzip compression
+  - Security headers
+  - Asset caching
+
+---
+
+## 🔧 Docker Commands
+
+### Start Services
 ```bash
-# Login to Heroku
-heroku login
+# Start in foreground (see logs)
+docker-compose up
 
-# Create app
-cd backend
-heroku create animal-park-api
+# Start in background
+docker-compose up -d
 
-# Add PostgreSQL
-heroku addons:create heroku-postgresql:mini
-
-# Set environment variables
-heroku config:set NODE_ENV=production
-heroku config:set JWT_SECRET=your-super-secret-jwt-key-change-this
-heroku config:set JWT_REFRESH_SECRET=your-refresh-secret-change-this
-
-# Deploy
-git init
-git add .
-git commit -m "Initial commit"
-git push heroku main
-
-# Run migrations and seed
-heroku run npx prisma migrate deploy
-heroku run npx prisma db seed
+# Rebuild and start
+docker-compose up --build
 ```
 
-#### Frontend Deployment
-
+### Stop Services
 ```bash
-# Create frontend app
-cd ../frontend
-heroku create animal-park-web
+# Stop containers
+docker-compose stop
 
-# Set backend URL
-heroku config:set VITE_API_URL=https://animal-park-api.herokuapp.com
+# Stop and remove containers
+docker-compose down
 
-# Deploy
-git init
-git add .
-git commit -m "Initial commit"
-git push heroku main
+# Stop and remove containers + volumes (clean slate)
+docker-compose down -v
+```
+
+### View Logs
+```bash
+# All services
+docker-compose logs
+
+# Specific service
+docker-compose logs backend
+docker-compose logs frontend
+docker-compose logs postgres
+
+# Follow logs (real-time)
+docker-compose logs -f backend
+```
+
+### Execute Commands in Containers
+```bash
+# Access backend shell
+docker-compose exec backend sh
+
+# Run Prisma commands
+docker-compose exec backend npx prisma studio
+docker-compose exec backend npx prisma migrate dev
+
+# Access database
+docker-compose exec postgres psql -U postgres -d animal_park
+```
+
+### Health Checks
+```bash
+# Check container health
+docker ps
+
+# Test backend health
+curl http://localhost:5000/health
+
+# Test frontend health
+curl http://localhost:3000/health
 ```
 
 ---
 
-### Option 3: Deploy to DigitalOcean App Platform
+## 🏗️ Docker Architecture
 
-**Time**: 45-60 minutes
+### Multi-Stage Builds
 
-#### Steps
+Both backend and frontend use multi-stage builds for:
+- **Smaller image sizes** (only production files)
+- **Faster builds** (cached layers)
+- **Better security** (no build tools in production)
 
-1. **Create Account**
-   - Sign up at digitalocean.com
-   - Get $200 free credit
+**Backend Dockerfile:**
+```dockerfile
+# Stage 1: Build
+FROM node:18-alpine AS builder
+# ... build steps ...
 
-2. **Create App**
-   - Click "Create" → "Apps"
-   - Connect GitHub repository
-   - Select branch
+# Stage 2: Production
+FROM node:18-alpine
+COPY --from=builder /app/dist ./dist
+# ... minimal runtime ...
+```
 
-3. **Configure Backend**
-   ```yaml
-   name: backend
-   environment_slug: node-js
-   build_command: npm install && npx prisma generate && npm run build
-   run_command: npm start
-   envs:
-     - key: DATABASE_URL
-       value: ${db.DATABASE_URL}
-     - key: NODE_ENV
-       value: production
-     - key: JWT_SECRET
-       value: your-secret-here
-   ```
+**Frontend Dockerfile:**
+```dockerfile
+# Stage 1: Build React app
+FROM node:18-alpine AS builder
+RUN npm run build
 
-4. **Configure Frontend**
-   ```yaml
-   name: frontend
-   environment_slug: node-js
-   build_command: npm install && npm run build
-   envs:
-     - key: VITE_API_URL
-       value: ${backend.PUBLIC_URL}
-   ```
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
 
-5. **Add Database**
-   - Add PostgreSQL database component
-   - Auto-connects to backend
+### Networking
 
-6. **Deploy**
-   - Click "Create Resources"
-   - Wait 5-10 minutes
+All services communicate through a custom bridge network:
+- Services can reference each other by name
+- Database URL: `postgresql://postgres:postgres@postgres:5432/animal_park`
+- Backend URL from frontend: `http://backend:5000`
 
----
+### Health Checks
 
-### Option 4: Deploy to AWS (Production-Grade)
+**PostgreSQL:**
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U postgres"]
+  interval: 10s
+```
 
-**Time**: 2-3 hours
+**Backend:**
+```yaml
+healthcheck:
+  test: ["CMD", "wget", "--spider", "http://localhost:5000/health"]
+  interval: 30s
+```
 
-#### Architecture
-- **Frontend**: S3 + CloudFront
-- **Backend**: EC2 or ECS
-- **Database**: RDS PostgreSQL
-- **Storage**: S3 for tickets/images
-
-#### Steps
-
-1. **Create RDS Database**
-   ```bash
-   # Create PostgreSQL instance
-   # Note connection string
-   ```
-
-2. **Deploy Backend to EC2**
-   ```bash
-   # Launch EC2 instance (t2.micro for free tier)
-   # Install Node.js and Docker
-   # Clone repository
-   # Set environment variables
-   # Run with PM2 or Docker
-   ```
-
-3. **Deploy Frontend to S3**
-   ```bash
-   # Build frontend
-   npm run build
-
-   # Upload to S3
-   aws s3 sync dist/ s3://animal-park-web
-
-   # Configure CloudFront
-   # Point to S3 bucket
-   ```
-
-4. **Configure Domain**
-   - Route 53 for DNS
-   - SSL certificate with ACM
+**Frontend:**
+```yaml
+healthcheck:
+  test: ["CMD", "wget", "--spider", "http://localhost:80"]
+  interval: 30s
+```
 
 ---
 
-## 🔧 Environment Variables
+## 🔒 Security Features
 
-### Backend (.env)
+### Non-Root Users
+Both backend and frontend run as non-root users:
+```dockerfile
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+USER nodejs
+```
 
-```bash
-# Database
-DATABASE_URL=postgresql://user:password@host:5432/animal_park
+### Nginx Security Headers
+```nginx
+add_header X-Frame-Options "SAMEORIGIN";
+add_header X-Content-Type-Options "nosniff";
+add_header X-XSS-Protection "1; mode=block";
+```
 
-# Server
+### Environment Variables
+Sensitive data in `.env` files (not committed to Git):
+- JWT secrets
+- Database credentials
+- API keys
+
+---
+
+## 🚀 Production Deployment
+
+### Environment Variables
+
+Create `.env` files for production:
+
+**backend/.env:**
+```env
+DATABASE_URL=postgresql://user:password@host:5432/dbname
+JWT_SECRET=your_production_secret_here
 NODE_ENV=production
-PORT=5000
-
-# JWT
-JWT_SECRET=your-super-secret-jwt-key-min-32-characters
-JWT_REFRESH_SECRET=your-refresh-secret-min-32-characters
-JWT_EXPIRES_IN=1h
-JWT_REFRESH_EXPIRES_IN=7d
-
-# Frontend URL (for CORS)
-FRONTEND_URL=https://your-frontend-url.com
-
-# Payment (Add real credentials for production)
-MTN_API_KEY=your-mtn-api-key
-MTN_API_SECRET=your-mtn-secret
-AIRTEL_API_KEY=your-airtel-api-key
-AIRTEL_API_SECRET=your-airtel-secret
-
-# Optional: Email/SMS
-SENDGRID_API_KEY=your-sendgrid-key
-TWILIO_ACCOUNT_SID=your-twilio-sid
-TWILIO_AUTH_TOKEN=your-twilio-token
-
-# Optional: File Storage
-AWS_ACCESS_KEY_ID=your-aws-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret
-AWS_S3_BUCKET=animal-park-tickets
+FRONTEND_URL=https://your-domain.com
 ```
 
-### Frontend (.env)
+**frontend/.env:**
+```env
+VITE_API_URL=https://api.your-domain.com
+```
+
+### Docker Compose Production
+
+```yaml
+version: '3.8'
+services:
+  backend:
+    image: your-registry/animal-park-backend:latest
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+```
+
+### Build and Push Images
 
 ```bash
-VITE_API_URL=https://your-backend-url.com
+# Build images
+docker build -t animal-park-backend:latest ./backend
+docker build -t animal-park-frontend:latest ./frontend
+
+# Tag for registry
+docker tag animal-park-backend:latest your-registry/animal-park-backend:latest
+
+# Push to registry
+docker push your-registry/animal-park-backend:latest
 ```
 
 ---
 
-## 📋 Pre-Deployment Checklist
+## 📊 Monitoring
 
-### Security
-- [ ] Change all default secrets
-- [ ] Enable HTTPS/SSL
-- [ ] Configure CORS properly
-- [ ] Set secure cookie flags
-- [ ] Enable rate limiting
-- [ ] Add input sanitization
-- [ ] Configure CSP headers
-
-### Database
-- [ ] Run migrations
-- [ ] Seed initial data
-- [ ] Set up backups
-- [ ] Configure connection pooling
-- [ ] Enable query logging (temporarily)
-
-### Monitoring
-- [ ] Set up error tracking (Sentry)
-- [ ] Configure logging (Winston/Pino)
-- [ ] Add uptime monitoring
-- [ ] Set up alerts
-- [ ] Configure analytics
-
-### Performance
-- [ ] Enable gzip compression
-- [ ] Configure CDN for static assets
-- [ ] Optimize images
-- [ ] Enable caching
-- [ ] Minify frontend assets
-
-### Testing
-- [ ] Test all API endpoints
-- [ ] Verify payment flow
-- [ ] Test QR generation
-- [ ] Verify email/SMS (if enabled)
-- [ ] Cross-browser testing
-- [ ] Mobile responsiveness
-
----
-
-## 🔍 Post-Deployment Verification
-
-### 1. Health Checks
+### Container Stats
 ```bash
-# Backend health
-curl https://your-api.com/health
+# Real-time stats
+docker stats
 
-# Should return: {"status":"ok","timestamp":"..."}
+# Specific container
+docker stats animal_park_backend
 ```
 
-### 2. Test Authentication
+### Disk Usage
 ```bash
-# Register user
-curl -X POST https://your-api.com/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"test123","firstName":"Test","lastName":"User","phone":"+250788123456"}'
+# Show Docker disk usage
+docker system df
 
-# Login
-curl -X POST https://your-api.com/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"test123"}'
+# Clean up unused resources
+docker system prune
 ```
 
-### 3. Test Parks API
+### Logs Management
 ```bash
-# Get parks
-curl https://your-api.com/api/parks
+# Limit log size in docker-compose.yml
+services:
+  backend:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 ```
-
-### 4. Frontend Verification
-- Visit homepage
-- Test login
-- Browse parks
-- Create booking
-- Check responsive design
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Database Connection Issues
+### Port Already in Use
 ```bash
-# Check DATABASE_URL format
-# Should be: postgresql://user:pass@host:port/dbname
+# Find process using port
+netstat -ano | findstr :5000
 
-# Test connection
-npx prisma db push
+# Kill process (Windows)
+taskkill /PID <PID> /F
 ```
 
-### CORS Errors
-```typescript
-// backend/src/app.ts
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
-}));
+### Database Connection Issues
+```bash
+# Check if PostgreSQL is running
+docker-compose ps postgres
+
+# View PostgreSQL logs
+docker-compose logs postgres
+
+# Restart database
+docker-compose restart postgres
 ```
 
 ### Build Failures
 ```bash
-# Clear caches
-rm -rf node_modules package-lock.json
-npm install
+# Clean build (no cache)
+docker-compose build --no-cache
 
-# Regenerate Prisma
-npx prisma generate
+# Remove all containers and rebuild
+docker-compose down
+docker-compose up --build
 ```
 
-### Port Already in Use
+### Permission Errors
 ```bash
-# Find and kill process
-# Windows:
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
-
-# Linux/Mac:
-lsof -ti:5000 | xargs kill
+# Fix volume permissions
+docker-compose down -v
+docker volume rm animal_park_postgres_data
+docker-compose up
 ```
 
 ---
 
-## 📊 Monitoring & Maintenance
+## ✅ Deployment Checklist
 
-### Daily
-- Check error logs
-- Monitor uptime
-- Review failed payments
-
-### Weekly
-- Database backup verification
-- Performance metrics review
-- Security updates
-
-### Monthly
-- Dependency updates
-- Security audit
-- User feedback review
-- Feature usage analytics
+- [ ] Docker and Docker Compose installed
+- [ ] Environment variables configured
+- [ ] `.dockerignore` files present
+- [ ] Health checks working
+- [ ] Database migrations run successfully
+- [ ] All services start without errors
+- [ ] Frontend accessible at port 3000
+- [ ] Backend API responding at port 5000
+- [ ] Database persisting data (test by restarting)
+- [ ] Logs showing no errors
 
 ---
 
-## 🎯 Scaling Considerations
+## 📚 Additional Resources
 
-### When to Scale
-
-**Backend**:
-- Response time > 2 seconds
-- CPU usage > 70%
-- Memory usage > 80%
-
-**Database**:
-- Connection pool exhausted
-- Query time > 1 second
-- Storage > 80% full
-
-### Scaling Options
-
-1. **Vertical Scaling**
-   - Upgrade server size
-   - Increase database resources
-
-2. **Horizontal Scaling**
-   - Load balancer
-   - Multiple backend instances
-   - Database read replicas
-
-3. **Caching**
-   - Redis for sessions
-   - CDN for static assets
-   - Database query caching
+- [Docker Documentation](https://docs.docker.com/)
+- [Docker Compose Reference](https://docs.docker.com/compose/)
+- [Nginx Configuration](https://nginx.org/en/docs/)
+- [Prisma with Docker](https://www.prisma.io/docs/guides/deployment/deployment-guides/deploying-to-docker)
 
 ---
 
-## 💰 Cost Estimates
-
-### Free Tier (Development)
-- **Heroku**: Free (with limitations)
-- **DigitalOcean**: $200 credit
-- **AWS**: 12 months free tier
-- **Total**: $0/month
-
-### Small Production (~1000 users)
-- **Hosting**: $20-50/month
-- **Database**: $15-25/month
-- **CDN**: $5-10/month
-- **Monitoring**: $0-20/month
-- **Total**: $40-105/month
-
-### Medium Production (~10,000 users)
-- **Hosting**: $100-200/month
-- **Database**: $50-100/month
-- **CDN**: $20-50/month
-- **Monitoring**: $20-50/month
-- **Total**: $190-400/month
-
----
-
-## 🎉 You're Ready to Deploy!
-
-Choose your deployment option and follow the steps above. The system is production-ready!
-
-**Need help?** Check the troubleshooting section or review the logs.
-
----
-
-**Good luck with your deployment! 🚀**
+**Deployment Status:** ✅ Production Ready

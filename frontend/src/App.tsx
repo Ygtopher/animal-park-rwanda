@@ -21,7 +21,7 @@ import './App.css';
 
 function App() {
     const dispatch = useDispatch<AppDispatch>();
-    const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+    const { user } = useSelector((state: RootState) => state.auth);
 
     // Fetch current user on app load if token exists
     useEffect(() => {
@@ -32,7 +32,7 @@ function App() {
     }, [dispatch, user]);
 
     return (
-        <div className="app" data-theme="light">
+        <div className="app">
             <Navbar />
             <Toaster position="top-right" />
             <Routes>
